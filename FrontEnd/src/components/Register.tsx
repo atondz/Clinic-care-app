@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './Register.css';
+import { toast, ToastContainer   } from 'react-toastify';
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -30,7 +31,8 @@ const Register: React.FC = () => {
 
     // Kiểm tra nếu mật khẩu không khớp
     if (formData.password !== formData.confirmPassword) {
-      setError('Mật khẩu không khớp. Vui lòng nhập lại.');
+      
+      toast.success('Mật khẩu không khớp. Vui lòng nhập lại.');
       return;
     }
 
@@ -42,13 +44,15 @@ const Register: React.FC = () => {
         role: formData.role,
       });
 
-      setSuccess('Đăng ký thành công! Chuyển hướng đến trang đăng nhập...');
+      toast.success('Đăng ký thành công! Chuyển hướng đến trang đăng nhập...');
       console.log(response.data);
 
-      // Chuyển hướng sau 2 giây
+      // Chuyển hướng sau 0.05 giây
+      
       setTimeout(() => {
         navigate('/login');
-      }, 2000);
+       
+      }, 500);
     } catch (err) {
       setError('Lỗi: Không thể đăng ký tài khoản.');
       console.error(err);
@@ -93,6 +97,7 @@ const Register: React.FC = () => {
         {success && <p className="register-message success">{success}</p>}
         <button type="submit">Đăng ký</button>
       </form>
+     <ToastContainer/> 
     </div>
   );
 };
