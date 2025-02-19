@@ -1,4 +1,3 @@
-// src/components/Register.tsx
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +8,7 @@ const Register: React.FC = () => {
     name: '',
     email: '',
     password: '',
+    confirmPassword: '',
     role: 'staff',
   });
 
@@ -16,7 +16,7 @@ const Register: React.FC = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -26,27 +26,41 @@ const Register: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSuccess(null);
+
+    // Kiểm tra nếu mật khẩu không khớp
+    if (formData.password !== formData.confirmPassword) {
+      setError('Mật khẩu không khớp. Vui lòng nhập lại.');
+      return;
+    }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/users/register', formData);
-      setSuccess('User registered successfully!');
+      const response = await axios.post('http://localhost:5001/api/users/register', {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+      });
+
+      setSuccess('Đăng ký thành công! Chuyển hướng đến trang đăng nhập...');
       console.log(response.data);
-      // Redirect to login page after successful registration
+
+      // Chuyển hướng sau 2 giây
       setTimeout(() => {
         navigate('/login');
       }, 2000);
     } catch (err) {
-      setError('Error: Could not register the user.');
+      setError('Lỗi: Không thể đăng ký tài khoản.');
       console.error(err);
     }
   };
 
   return (
     <div className="register-container">
-      <h2>Register</h2>
+      <h2>Đăng ký</h2>
       <form className="register-form" onSubmit={handleSubmit}>
         <div>
-          <label>Name:</label>
+          <label>Tên:</label>
           <input type="text" name="name" value={formData.name} onChange={handleChange} required />
         </div>
         <div>
@@ -54,24 +68,33 @@ const Register: React.FC = () => {
           <input type="email" name="email" value={formData.email} onChange={handleChange} required />
         </div>
         <div>
-          <label>Password:</label>
+          <label>Mật khẩu:</label>
           <input type="password" name="password" value={formData.password} onChange={handleChange} required />
         </div>
         <div>
-          <label>Role:</label>
+          <label>Xác nhận mật khẩu:</label>
+          <input
+            type="password"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div>
+          <label>Vai trò:</label>
           <select name="role" value={formData.role} onChange={handleChange}>
-            <option value="doctor">Doctor</option>
-            <option value="staff">Staff</option>
-            <option value="admin">Admin</option>
+            <option value="doctor">Bác sĩ</option>
+            <option value="staff">Nhân viên</option>
+            <option value="admin">Quản trị viên</option>
           </select>
         </div>
         {error && <p className="register-message error">{error}</p>}
         {success && <p className="register-message success">{success}</p>}
-        <button type="submit">Register</button>
+        <button type="submit">Đăng ký</button>
       </form>
     </div>
   );
-  
 };
 
 export default Register;
